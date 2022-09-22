@@ -29,7 +29,7 @@ const Todo: FC<any> = (props: IProps) => {
     setAllTodos(getLocalStorageData("todo"));
   }, []);
   useEffect(() => {
-    if (props.showLimit && props.showLimit < 10) {
+    if (props.showLimit && props.showLimit < showLimit) {
       setShowLimit(props.showLimit);
     }
   }, [props]);
@@ -45,11 +45,22 @@ const Todo: FC<any> = (props: IProps) => {
   };
 
   const addTodo = () => {
-    console.log(todo);
-    const data = [...allTodos, todo];
-    setDataInLocalStorage("todo", data);
-    setAllTodos(data);
-    clear();
+    const isTodoAlreadyExists = allTodos.some(
+      (item: TodoType) =>
+        item.todoName.toLowerCase() === todo.todoName.toLowerCase()
+    );
+    if (!isTodoAlreadyExists) {
+      if (allTodos.length < showLimit) {
+        const data = [...allTodos, todo];
+        setDataInLocalStorage("todo", data);
+        setAllTodos(data);
+        clear();
+      } else {
+        alert("You can not add more than" + showLimit + " todos");
+      }
+    } else {
+      alert("todo already exists");
+    }
   };
 
   const clear = () => {

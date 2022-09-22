@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+.container-fluid{
+    margin:1rem;
+}
+
 .form{
     width: fit-content;
     padding: 2rem;
@@ -48,4 +52,16 @@ input[type="text"],textarea{
     outline: none;
     padding: 0.5rem;
     margin-left:1rem
+}
+
+.delete-btn{
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50% 50%;
+    margin-right: 1rem;
+}
+
+.todo-container li{
+    list-style-type: none;
+    margin-top: 5px;
 }

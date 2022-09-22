@@ -1,17 +1,33 @@
 import React, { FC, useEffect, useState } from "react";
 import { withStyles } from "direflow-component";
 import todoStyles from "./todo.css";
+import {
+  getLocalStorageData,
+  setDataInLocalStorage,
+} from "./../utils/Common.service";
+import { CommonConstant } from "../utils/Common.constants";
 
 interface IProps {
   showLimit: number;
 }
+
+interface TodoType {
+  todoName: string;
+  desc: string;
+  isUrgent: boolean;
+}
 const Todo: FC<any> = (props: IProps) => {
   const [showLimit, setShowLimit] = useState(10);
+  const [allTodos, setAllTodos] = useState([] as any);
   const [todo, setTodo] = useState({
     todoName: "",
     desc: "",
     isUrgent: false,
-  });
+  } as TodoType);
+
+  useEffect(() => {
+    setAllTodos(getLocalStorageData("todo"));
+  }, []);
   useEffect(() => {
     if (props.showLimit && props.showLimit < 10) {
       setShowLimit(props.showLimit);
@@ -30,6 +46,10 @@ const Todo: FC<any> = (props: IProps) => {
 
   const addTodo = () => {
     console.log(todo);
+    const data = [...allTodos, todo];
+    setDataInLocalStorage("todo", data);
+    setAllTodos(data);
+    clear();
   };
 
   const clear = () => {
@@ -38,6 +58,25 @@ const Todo: FC<any> = (props: IProps) => {
       desc: "",
       isUrgent: false,
     });
+  };
+
+  const deleteTodo = (deletingItem: TodoType) => {
+    if (deletingItem) {
+      const filteredData = allTodos.filter(
+        (todo: TodoType) =>
+          todo.todoName.toLowerCase() !== deletingItem.todoName.toLowerCase()
+      );
+      setAllTodos(filteredData);
+      setDataInLocalStorage("todo", filteredData);
+    }
+  };
+
+  const checkEnableDisable = (type: string): boolean => {
+    if (type.toLowerCase() === CommonConstant.add.toLowerCase()) {
+      return todo.todoName ? false : true;
+    } else {
+      return todo.todoName || todo.desc || todo.isUrgent ? false : true;
+    }
   };
 
   return (
@@ -89,6 +128,7 @@ const Todo: FC<any> = (props: IProps) => {
                 type="button"
                 className="btn submit-btn"
                 onClick={addTodo}
+                disabled={checkEnableDisable("add")}
               >
                 Add +
               </button>
@@ -96,12 +136,46 @@ const Todo: FC<any> = (props: IProps) => {
                 type="button"
                 className="btn clear-btn ml-2"
                 onClick={clear}
+                disabled={checkEnableDisable("clear")}
               >
                 Clear
               </button>
             </form>
           </div>
-          <div className="col-md-8"></div>
+          <div className="col-md-8">
+            {allTodos && allTodos.length ? (
+              <div>
+                <ul className="todo-container">
+                  {allTodos.map((todo: TodoType, index: number) => {
+                    if (index + 1 <= showLimit) {
+                      return (
+                        <li key={index}>
+                          <span>
+                            <button
+                              className="btn btn-danger delete-btn"
+                              onClick={() => deleteTodo(todo)}
+                            >
+                              &times;
+                            </button>
+                          </span>
+                          <strong>{todo.todoName}</strong>:{" "}
+                          <span
+                            style={{ color: todo.isUrgent ? "red" : "black" }}
+                          >
+                            {todo.desc}
+                          </span>
+                        </li>
+                      );
+                    } else {
+                      return null;
+                    }
+                  })}
+                </ul>
+              </div>
+            ) : (
+              <p>No todo</p>
+            )}
+          </div>
         </div>
       </div>
     </>
